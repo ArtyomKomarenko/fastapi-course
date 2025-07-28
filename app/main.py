@@ -1,91 +1,12 @@
-from fastapi import FastAPI, Query, Body
-from fastapi.openapi.docs import get_swagger_ui_html
 import uvicorn
+from fastapi import FastAPI
+from fastapi.openapi.docs import get_swagger_ui_html
+
+from app.handlers.hotels import router as router_hotels
 
 app = FastAPI(docs_url=None)
 
-hotels = [
-    {"id": 1, "title": "Sochi", "name": "Сочи"},
-    {"id": 2, "title": "Дубай", "name": "Дубай"},
-]
-
-
-@app.get("/hotels")
-def get_hotels(
-        id: int | None = Query(None, description="Айдишник"),
-        title: str | None = Query(None, description="Название отеля"),
-):
-    hotels_ = []
-    for hotel in hotels:
-        if id and hotel["id"] != id:
-            continue
-        if title and hotel["title"] != title:
-            continue
-        hotels_.append(hotel)
-    return hotels_
-
-
-@app.post("/hotels")
-def create_hotel(
-        title: str = Body(embed=True),
-):
-    global hotels
-    hotels.append({
-        "id": hotels[-1]["id"] + 1,
-        "title": title
-    })
-    return {"status": "OK"}
-
-
-@app.delete("/hotels/{hotel_id}")
-def delete_hotel(hotel_id: int):
-    global hotels
-    hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
-    return {"status": "OK"}
-
-
-@app.put("/hotels/{hotel_id}")
-def update_hotel_full(
-    hotel_id: int,
-    title: str = Body(embed=True),
-    name: str = Body(embed=True),
-):
-    global hotels
-    exists = False
-
-    for hotel in hotels:
-        if hotel["id"] == hotel_id:
-            exists = True
-            hotel["title"] = title
-            hotel["name"] = name
-
-    if not exists:
-        return {"status": "Отель с указанным id не существует"}
-
-    return {"status": "OK"}
-
-
-@app.patch("/hotels/{hotel_id}")
-def update_hotel_partial(
-        hotel_id: int,
-        title: str | None = Body(embed=True),
-        name: str | None = Body(embed=True),
-):
-    global hotels
-    exists = False
-
-    for hotel in hotels:
-        if hotel["id"] == hotel_id:
-            exists = True
-            if title:
-                hotel["title"] = title
-            if name:
-                hotel["name"] = name
-
-    if not exists:
-        return {"status": "Отель с указанным id не существует"}
-
-    return {"status": "OK"}
+app.include_router(router_hotels)
 
 
 @app.get("/docs", include_in_schema=False)
