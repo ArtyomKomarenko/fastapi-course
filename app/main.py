@@ -44,6 +44,50 @@ def delete_hotel(hotel_id: int):
     return {"status": "OK"}
 
 
+@app.put("/hotels/{hotel_id}")
+def update_hotel_full(
+    hotel_id: int,
+    title: str = Body(embed=True),
+    name: str = Body(embed=True),
+):
+    global hotels
+    exists = False
+
+    for hotel in hotels:
+        if hotel["id"] == hotel_id:
+            exists = True
+            hotel["title"] = title
+            hotel["name"] = name
+
+    if not exists:
+        return {"status": "Отель с указанным id не существует"}
+
+    return {"status": "OK"}
+
+
+@app.patch("/hotels/{hotel_id}")
+def update_hotel_partial(
+        hotel_id: int,
+        title: str | None = Body(embed=True),
+        name: str | None = Body(embed=True),
+):
+    global hotels
+    exists = False
+
+    for hotel in hotels:
+        if hotel["id"] == hotel_id:
+            exists = True
+            if title:
+                hotel["title"] = title
+            if name:
+                hotel["name"] = name
+
+    if not exists:
+        return {"status": "Отель с указанным id не существует"}
+
+    return {"status": "OK"}
+
+
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html():
     return get_swagger_ui_html(
