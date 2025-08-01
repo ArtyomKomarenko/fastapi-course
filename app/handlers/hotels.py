@@ -18,9 +18,9 @@ hotels = [
 
 @router.get("")
 def get_hotels(
-        pagination: PaginationDep,
-        id: int | None = Query(None, description="Айдишник"),  # noqa: FAST002
-        title: str | None = Query(None, description="Название отеля"),  # noqa: FAST002
+    pagination: PaginationDep,
+    id: int | None = Query(None, description="Айдишник"),  # noqa: FAST002
+    title: str | None = Query(None, description="Название отеля"),  # noqa: FAST002
 ) -> list:
     hotels_ = []
     for hotel in hotels:
@@ -29,17 +29,19 @@ def get_hotels(
         if title and hotel["title"] != title:
             continue
         hotels_.append(hotel)
-    return hotels_[(pagination.page - 1) * pagination.per_page: pagination.page * pagination.per_page]
+    return hotels_[(pagination.page - 1) * pagination.per_page : pagination.page * pagination.per_page]
 
 
 @router.post("")
 def create_hotel(hotel_data: Hotel) -> dict:
     global hotels
-    hotels.append({
-        "id": hotels[-1]["id"] + 1,
-        "title": hotel_data.title,
-        "name": hotel_data.name,
-    })
+    hotels.append(
+        {
+            "id": hotels[-1]["id"] + 1,
+            "title": hotel_data.title,
+            "name": hotel_data.name,
+        },
+    )
     return {"status": "OK"}
 
 
