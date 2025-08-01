@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query
 
-from app.schemas.hotels import Hotel, HotelPATCH
 from app.handlers.dependencies import PaginationDep
+from app.schemas.hotels import Hotel, HotelPATCH
 
 router = APIRouter(prefix="/hotels")
 
@@ -19,9 +19,9 @@ hotels = [
 @router.get("")
 def get_hotels(
         pagination: PaginationDep,
-        id: int | None = Query(None, description="Айдишник"),
-        title: str | None = Query(None, description="Название отеля"),
-):
+        id: int | None = Query(None, description="Айдишник"),  # noqa: FAST002
+        title: str | None = Query(None, description="Название отеля"),  # noqa: FAST002
+) -> list:
     hotels_ = []
     for hotel in hotels:
         if id and hotel["id"] != id:
@@ -33,7 +33,7 @@ def get_hotels(
 
 
 @router.post("")
-def create_hotel(hotel_data: Hotel):
+def create_hotel(hotel_data: Hotel) -> dict:
     global hotels
     hotels.append({
         "id": hotels[-1]["id"] + 1,
@@ -44,7 +44,7 @@ def create_hotel(hotel_data: Hotel):
 
 
 @router.put("/{hotel_id}")
-def update_hotel_full(hotel_id: int, hotel_data: Hotel):
+def update_hotel_full(hotel_id: int, hotel_data: Hotel) -> dict:
     global hotels
     exists = False
 
@@ -61,7 +61,7 @@ def update_hotel_full(hotel_id: int, hotel_data: Hotel):
 
 
 @router.patch("/{hotel_id}")
-def update_hotel_partial(hotel_id: int, hotel_data: HotelPATCH):
+def update_hotel_partial(hotel_id: int, hotel_data: HotelPATCH) -> dict:
     global hotels
     exists = False
 
@@ -80,7 +80,7 @@ def update_hotel_partial(hotel_id: int, hotel_data: HotelPATCH):
 
 
 @router.delete("/{hotel_id}")
-def delete_hotel(hotel_id: int):
+def delete_hotel(hotel_id: int) -> dict:
     global hotels
     hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
     return {"status": "OK"}
