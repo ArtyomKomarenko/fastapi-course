@@ -39,6 +39,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "config.py" = ["N802"]
 "env.py" = ["ERA001", "F401", "INP001"]
+"app/migrations/versions/*.py" = ["INP001", "W291"]
 
 [tool.ruff.lint.flake8-quotes]
 docstring-quotes = "double"
