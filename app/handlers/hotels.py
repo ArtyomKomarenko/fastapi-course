@@ -1,30 +1,29 @@
 from fastapi import APIRouter, Query
-from sqlalchemy import insert, select
+from sqlalchemy import func, insert, select
 
 from app.database import async_session_maker
 from app.handlers.dependencies import PaginationDep
 from app.models.hotels import HotelsOrm
+from app.repositories.hotels import HotelsRepository
 from app.schemas.hotels import Hotel, HotelPATCH
 
 router = APIRouter(prefix="/hotels")
 
 
 @router.get("")
-async def get_hotels(   # noqa: ANN201
+async def get_hotels(
     pagination: PaginationDep,
     title: str | None = Query(None, description="Название отеля"),  # noqa: FAST002
     location: str | None = Query(None, description="Локация отеля"),  # noqa: FAST002
 ):
     per_page = pagination.per_page or 5
     async with async_session_maker() as session:
-        query = select(HotelsOrm)
-        if title:
-            query = query.filter(HotelsOrm.title.like(f"%{title}%"))
-        if location:
-            query = query.filter(HotelsOrm.location.like(f"%{location}%"))
-        query = query.limit(per_page).offset(per_page * (pagination.page - 1))
-        result = await session.execute(query)
-        return result.scalars().all()
+        return await HotelsRepository(session).get_all(
+            location=location,
+            title=title,
+            limit=per_page,
+            offset=per_page * (pagination.page - 1)
+        )
 
 
 @router.post("")
