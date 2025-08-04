@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 
 class PaginationParams(BaseModel):
-    page: Annotated[int | None, Query(None, gt=0, description="Порядковый номер страницы")]
+    page: Annotated[int | None, Query(1, gt=0, description="Порядковый номер страницы")]
     per_page: Annotated[int | None, Query(None, gt=0, lt=100, description="Кол-во элементов на странице")]
 
 

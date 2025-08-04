@@ -10,20 +10,21 @@ router = APIRouter(prefix="/hotels")
 
 
 @router.get("")
-async def get_hotels(
+async def get_hotels(   # noqa: ANN201
     pagination: PaginationDep,
-    id: int | None = Query(None, description="Айдишник"),  # noqa: FAST002
     title: str | None = Query(None, description="Название отеля"),  # noqa: FAST002
-) -> list:
+    location: str | None = Query(None, description="Локация отеля"),  # noqa: FAST002
+):
+    per_page = pagination.per_page or 5
     async with async_session_maker() as session:
         query = select(HotelsOrm)
-        if id:
-            query = query.filter_by(id=id)
         if title:
-            query = query.filter_by(title=title)
-        query = query.limit(pagination.per_page).offset(pagination.per_page * (pagination.page - 1))
+            query = query.filter(HotelsOrm.title.like(f"%{title}%"))
+        if location:
+            query = query.filter(HotelsOrm.location.like(f"%{location}%"))
+        query = query.limit(per_page).offset(per_page * (pagination.page - 1))
         result = await session.execute(query)
-        return result.scalar().all()
+        return result.scalars().all()
 
 
 @router.post("")
@@ -32,7 +33,6 @@ async def create_hotel(hotel_data: Hotel) -> dict:
         add_hotel_stmt = insert(HotelsOrm).values(**hotel_data.model_dump())
         await session.execute(add_hotel_stmt)
         await session.commit()
-
     return {"status": "OK"}
 
 
