@@ -1,4 +1,4 @@
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 
 from app.models.hotels import HotelsOrm
 from app.repositories.base import BaseRepository
@@ -24,7 +24,6 @@ class HotelsRepository(BaseRepository):
             .limit(limit)
             .offset(offset)
         )
-        print(query.compile(compile_kwargs={"literal_binds": True}))
         result = await self.session.execute(query)
 
         return result.scalars().all()

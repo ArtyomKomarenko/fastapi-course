@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Query
-from sqlalchemy import func, insert, select
 
 from app.database import async_session_maker
 from app.handlers.dependencies import PaginationDep
-from app.models.hotels import HotelsOrm
 from app.repositories.hotels import HotelsRepository
 from app.schemas.hotels import Hotel, HotelPATCH
 
@@ -22,17 +20,16 @@ async def get_hotels(
             location=location,
             title=title,
             limit=per_page,
-            offset=per_page * (pagination.page - 1)
+            offset=per_page * (pagination.page - 1),
         )
 
 
 @router.post("")
-async def create_hotel(hotel_data: Hotel) -> dict:
+async def create_hotel(hotel_data: Hotel):
     async with async_session_maker() as session:
-        add_hotel_stmt = insert(HotelsOrm).values(**hotel_data.model_dump())
-        await session.execute(add_hotel_stmt)
+        hotel = await HotelsRepository(session).add(hotel_data)
         await session.commit()
-    return {"status": "OK"}
+    return {"status": "OK", "data": hotel}
 
 
 @router.put("/{hotel_id}")

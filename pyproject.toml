@@ -31,7 +31,7 @@ line-length=120
 select = ["ALL"]
 ignore = [
     "A002",
-    "ANN001","ANN201","ANN003",  # временно
+    "ANN001", "ANN002", "ANN201","ANN003", "ARG002",  # временно
     "D",
     "PLW0603", "PLW0602",  # временно
     "RUF001",
