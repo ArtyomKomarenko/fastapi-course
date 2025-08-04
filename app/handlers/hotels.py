@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 
 from app.database import async_session_maker
 from app.handlers.dependencies import PaginationDep
@@ -33,19 +33,13 @@ async def create_hotel(hotel_data: Hotel):
 
 
 @router.put("/{hotel_id}")
-def update_hotel_full(hotel_id: int, hotel_data: Hotel) -> dict:
-    global hotels
-    exists = False
-
-    for hotel in hotels:
-        if hotel["id"] == hotel_id:
-            exists = True
-            hotel["title"] = hotel_data.title
-            hotel["name"] = hotel_data.name
-
-    if not exists:
-        return {"status": "Отель с указанным id не существует"}
-
+async def update_hotel_full(hotel_id: int, hotel_data: Hotel):
+    async with async_session_maker() as session:
+        to_edit = await HotelsRepository(session).get_one_or_none(id=hotel_id)
+        if not to_edit:
+            return HTTPException(404)
+        await HotelsRepository(session).edit(hotel_data, id=hotel_id)
+        await session.commit()
     return {"status": "OK"}
 
 
@@ -69,7 +63,11 @@ def update_hotel_partial(hotel_id: int, hotel_data: HotelPATCH) -> dict:
 
 
 @router.delete("/{hotel_id}")
-def delete_hotel(hotel_id: int) -> dict:
-    global hotels
-    hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
+async def delete_hotel(hotel_id: int):
+    async with async_session_maker() as session:
+        to_delete = await HotelsRepository(session).get_one_or_none(id=hotel_id)
+        if not to_delete:
+            return HTTPException(404)
+        await HotelsRepository(session).delete(id=hotel_id)
+        await session.commit()
     return {"status": "OK"}
