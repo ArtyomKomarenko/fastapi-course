@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from app.database import async_session_maker
 from app.handlers.dependencies import PaginationDep
@@ -44,21 +44,13 @@ async def update_hotel_full(hotel_id: int, hotel_data: Hotel):
 
 
 @router.patch("/{hotel_id}")
-def update_hotel_partial(hotel_id: int, hotel_data: HotelPATCH) -> dict:
-    global hotels
-    exists = False
-
-    for hotel in hotels:
-        if hotel["id"] == hotel_id:
-            exists = True
-            if hotel_data.title:
-                hotel["title"] = hotel_data.title
-            if hotel_data.name:
-                hotel["name"] = hotel_data.name
-
-    if not exists:
-        return {"status": "Отель с указанным id не существует"}
-
+async def update_hotel_partial(hotel_id: int, hotel_data: HotelPATCH):
+    async with async_session_maker() as session:
+        to_edit = await HotelsRepository(session).get_one_or_none(id=hotel_id)
+        if not to_edit:
+            return HTTPException(404)
+        await HotelsRepository(session).edit(hotel_data, exclude_unset=True, id=hotel_id)
+        await session.commit()
     return {"status": "OK"}
 
 
