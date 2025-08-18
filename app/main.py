@@ -3,10 +3,12 @@ from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
 from starlette.responses import HTMLResponse
 
+from app.handlers.auth import router as auth_router
 from app.handlers.hotels import router as router_hotels
 
 app = FastAPI(docs_url=None)
 
+app.include_router(auth_router)
 app.include_router(router_hotels)
 
 
