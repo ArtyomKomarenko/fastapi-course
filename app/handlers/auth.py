@@ -1,13 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from passlib.context import CryptContext
 from sqlalchemy.exc import IntegrityError
-from starlette.requests import Request
 from starlette.responses import Response
 
 from app.database import async_session_maker
 from app.handlers.dependencies import UserIdDep
 from app.repositories.users import UsersRepository
-from app.schemas.users import UserAdd, UserCredentials, UserRequestAdd, UserGet
+from app.schemas.users import UserAdd, UserCredentials, UserGet, UserRequestAdd
 from app.services.auth import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и аутентификация"])
@@ -46,3 +45,9 @@ async def get_me(user_id: UserIdDep):
     async with async_session_maker() as session:
         user = await UsersRepository(session).get_one_or_none(id=user_id)
     return UserGet.model_validate(user, from_attributes=True)
+
+
+@router.post("/logout")
+async def logout(response: Response):
+    response.delete_cookie("access_token")
+    return {"status": "OK"}

@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, Query, HTTPException, Request
+from fastapi import Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 
 from app.services.auth import AuthService
@@ -9,7 +9,6 @@ from app.services.auth import AuthService
 class PaginationParams(BaseModel):
     page: Annotated[int | None, Query(1, gt=0, description="Порядковый номер страницы")]
     per_page: Annotated[int | None, Query(None, gt=0, lt=100, description="Кол-во элементов на странице")]
-
 
 
 PaginationDep = Annotated[PaginationParams, Depends()]
