@@ -8,6 +8,14 @@ class UserRequestAdd(BaseModel):
     password: str
 
 
+class UserCredentials(BaseModel):
+    email: EmailStr
+    password: str
+
+    def model_post_init(self, context: Any, /) -> None:  # noqa: ANN401
+        self.email = self.email.lower()
+
+
 class UserAdd(BaseModel):
     email: EmailStr
     hashed_password: str
@@ -19,3 +27,4 @@ class UserAdd(BaseModel):
 class User(BaseModel):
     id: int
     email: EmailStr
+    hashed_password: str
