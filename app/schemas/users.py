@@ -24,6 +24,11 @@ class UserAdd(BaseModel):
         self.email = self.email.lower()
 
 
+class UserGet(BaseModel):
+    id: int
+    email: EmailStr
+
+
 class User(BaseModel):
     id: int
     email: EmailStr
