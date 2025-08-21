@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from fastapi import APIRouter, HTTPException
 from passlib.context import CryptContext
 from sqlalchemy.exc import IntegrityError
@@ -23,7 +25,7 @@ async def register_user(user_data: UserRequestAdd):
             await UsersRepository(session).add(new_user_data)
             await session.commit()
     except IntegrityError:
-        return HTTPException(400, f"Пользователь с email {user_data.email} уже существует")
+        return HTTPException(HTTPStatus.BAD_REQUEST, f"Пользователь с email {user_data.email} уже существует")
     return {"status": "OK"}
 
 
@@ -32,9 +34,9 @@ async def login_user(credentials: UserCredentials, response: Response):
     async with async_session_maker() as session:
         user = await UsersRepository(session).get_one_or_none(email=credentials.email)
         if not user:
-            raise HTTPException(401, "Неверный email или пароль")
+            raise HTTPException(HTTPStatus.UNAUTHORIZED, "Неверный email или пароль")
         if not AuthService.verify_password(credentials.password, user.hashed_password):
-            raise HTTPException(401, "Неверный email или пароль")
+            raise HTTPException(HTTPStatus.UNAUTHORIZED, "Неверный email или пароль")
         access_token = AuthService.create_access_token({"user_id": user.id})
         response.set_cookie("access_token", access_token)
         return {"access_token": access_token}

@@ -5,11 +5,13 @@ from starlette.responses import HTMLResponse
 
 from app.handlers.auth import router as auth_router
 from app.handlers.hotels import router as router_hotels
+from app.handlers.rooms import router as router_rooms
 
 app = FastAPI(docs_url=None)
 
 app.include_router(auth_router)
 app.include_router(router_hotels)
+app.include_router(router_rooms)
 
 
 @app.get("/docs", include_in_schema=False)
